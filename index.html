@@ -440,7 +440,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- PANTALLA AUTENTICACIÓN -->
         <div id="authScreen" class="auth-screen">
             <div class="header">
                 <h1>💰 CajaApp</h1>
@@ -452,7 +451,6 @@
                 <button class="tab-btn" onclick="switchTab('registro')">Registro</button>
             </div>
 
-            <!-- FORMULARIO LOGIN -->
             <form class="auth-form active" id="loginForm" onsubmit="handleLogin(event)">
                 <div class="error-message" id="loginError"></div>
                 <div class="loading" id="loginLoading">Accediendo...</div>
@@ -461,7 +459,6 @@
                 <button type="submit">Acceder</button>
             </form>
 
-            <!-- FORMULARIO REGISTRO -->
             <form class="auth-form" id="registroForm" onsubmit="handleRegistro(event)">
                 <div class="error-message" id="registroError"></div>
                 <div class="loading" id="registroLoading">Creando cuenta...</div>
@@ -472,7 +469,6 @@
             </form>
         </div>
 
-        <!-- PANTALLA PRINCIPAL -->
         <div id="mainScreen" class="main-screen">
             <div class="top-bar">
                 <div class="user-info">
@@ -482,21 +478,18 @@
             </div>
 
             <div class="dashboard">
-                <!-- SALDO ACTUAL -->
                 <div class="saldo-container">
                     <div class="saldo-label">Efectivo en Caja</div>
                     <div class="saldo-amount" id="saldoAmount">€0,00</div>
                     <div class="saldo-info">Total disponible</div>
                 </div>
 
-                <!-- FORMULARIO NUEVO MOVIMIENTO -->
                 <div class="add-movimiento-section">
                     <button type="button" class="btn-primary" onclick="showAddModal()">
                         ➕ Nuevo Movimiento
                     </button>
                 </div>
 
-                <!-- HISTORIAL -->
                 <div id="historialContainer">
                     <div class="historial-title">Últimos Movimientos</div>
                     <div id="movimientosList" class="movimientos-lista">
@@ -507,7 +500,6 @@
         </div>
     </div>
 
-    <!-- MODAL PARA AÑADIR/EDITAR -->
     <div id="modalMovimiento" class="modal">
         <div class="modal-content">
             <h2 id="modalTitle">Nuevo Movimiento</h2>
@@ -530,37 +522,30 @@
         </div>
     </div>
 
-    <!-- FIREBASE SDK - VERSIÓN SIMPLE Y ESTABLE -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js"></script>
 
     <script>
-        // ==================== CONFIGURACIÓN FIREBASE ====================
-        // 👇 PEGA TU CÓDIGO DE FIREBASE AQUÍ 👇
         const firebaseConfig = {
-          apiKey: "AIzaSyBto_T18FKrJUVC3dmzairhC8RdJA6VgPk",
-          authDomain: "cajaapp-30821.firebaseapp.com",
-          projectId: "cajaapp-30821",
-          storageBucket: "cajaapp-30821.firebasestorage.app",
-          messagingSenderId: "1083812484355",
-          appId: "1:1083812484355:web:6815bd072e1702ae648536"
+            apiKey: "AIzaSyBto_T18FKrJUVC3dmzairhC8RdJA6VgPk",
+            authDomain: "cajaapp-30821.firebaseapp.com",
+            projectId: "cajaapp-30821",
+            storageBucket: "cajaapp-30821.firebasestorage.app",
+            messagingSenderId: "1083812484355",
+            appId: "1:1083812484355:web:6815bd072e1702ae648536"
         };
 
-        // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        console.log("✅ Firebase inicializado correctamente");
-        
-        // ==================== ESTADO ====================
+        console.log("Firebase inicializado correctamente");
+
         let usuarioActual = null;
         let movimientoEditando = null;
 
-        // ==================== INICIALIZACIÓN ====================
         document.addEventListener('DOMContentLoaded', function() {
-            // Observar cambios de autenticación
             auth.onAuthStateChanged((user) => {
                 usuarioActual = user;
                 mostrarPantalla();
@@ -569,12 +554,10 @@
                 }
             });
 
-            // Establecer fecha actual en el modal
             const hoy = new Date().toISOString().split('T')[0];
             document.getElementById('modalFecha').value = hoy;
         });
 
-        // ==================== CAMBIAR ENTRE TABS ====================
         function switchTab(tab) {
             const loginForm = document.getElementById('loginForm');
             const registroForm = document.getElementById('registroForm');
@@ -592,12 +575,10 @@
                 buttons[1].classList.add('active');
             }
 
-            // Limpiar errores
             document.getElementById('loginError').classList.remove('show');
             document.getElementById('registroError').classList.remove('show');
         }
 
-        // ==================== LOGIN ====================
         function handleLogin(event) {
             event.preventDefault();
 
@@ -608,28 +589,23 @@
             const loginError = document.getElementById('loginError');
             const submitBtn = document.querySelector('#loginForm button');
 
-            // Mostrar estado de carga
             loginLoading.classList.add('show');
             submitBtn.disabled = true;
             loginError.classList.remove('show');
 
             auth.signInWithEmailAndPassword(email, password)
                 .then((userCredential) => {
-                    // Login exitoso
-                    console.log("✅ Login exitoso:", userCredential.user.email);
                     loginLoading.classList.remove('show');
                     submitBtn.disabled = false;
                     limpiarFormularios();
                 })
                 .catch((error) => {
-                    // Error
-                    console.error("❌ Error de login:", error.code);
                     loginLoading.classList.remove('show');
                     submitBtn.disabled = false;
 
                     let mensaje = 'Error desconocido';
                     if (error.code === 'auth/user-not-found') {
-                        mensaje = 'El email no existe. ¿Quizás quieras crear una cuenta?';
+                        mensaje = 'El email no existe';
                     } else if (error.code === 'auth/wrong-password') {
                         mensaje = 'Contraseña incorrecta';
                     } else if (error.code === 'auth/invalid-email') {
@@ -641,7 +617,6 @@
                 });
         }
 
-        // ==================== REGISTRO ====================
         function handleRegistro(event) {
             event.preventDefault();
 
@@ -653,7 +628,6 @@
             const registroError = document.getElementById('registroError');
             const submitBtn = document.querySelector('#registroForm button');
 
-            // Validar contraseñas
             if (password !== password2) {
                 registroError.textContent = 'Las contraseñas no coinciden';
                 registroError.classList.add('show');
@@ -661,39 +635,34 @@
             }
 
             if (password.length < 6) {
-                registroError.textContent = 'La contraseña debe tener mínimo 6 caracteres';
+                registroError.textContent = 'Mínimo 6 caracteres';
                 registroError.classList.add('show');
                 return;
             }
 
-            // Mostrar estado de carga
             registroLoading.classList.add('show');
             submitBtn.disabled = true;
             registroError.classList.remove('show');
 
             auth.createUserWithEmailAndPassword(email, password)
                 .then((userCredential) => {
-                    // Cuenta creada
-                    console.log("✅ Cuenta creada:", userCredential.user.email);
                     registroLoading.classList.remove('show');
                     submitBtn.disabled = false;
                     limpiarFormularios();
                     switchTab('login');
-                    alert('¡Cuenta creada! Ahora puedes acceder con tus credenciales.');
+                    alert('¡Cuenta creada! Ahora puedes acceder.');
                 })
                 .catch((error) => {
-                    // Error
-                    console.error("❌ Error de registro:", error.code);
                     registroLoading.classList.remove('show');
                     submitBtn.disabled = false;
 
                     let mensaje = 'Error desconocido';
                     if (error.code === 'auth/email-already-in-use') {
-                        mensaje = 'Este email ya está registrado';
+                        mensaje = 'Este email ya existe';
                     } else if (error.code === 'auth/invalid-email') {
                         mensaje = 'Email inválido';
                     } else if (error.code === 'auth/weak-password') {
-                        mensaje = 'Contraseña demasiado débil';
+                        mensaje = 'Contraseña débil';
                     }
 
                     registroError.textContent = mensaje;
@@ -701,18 +670,15 @@
                 });
         }
 
-        // ==================== LOGOUT ====================
         function handleLogout() {
             auth.signOut().then(() => {
                 usuarioActual = null;
                 movimientoEditando = null;
                 limpiarFormularios();
                 mostrarPantalla();
-                console.log("✅ Sesión cerrada");
             });
         }
 
-        // ==================== MOSTRAR PANTALLAS ====================
         function mostrarPantalla() {
             const authScreen = document.getElementById('authScreen');
             const mainScreen = document.getElementById('mainScreen');
@@ -727,7 +693,6 @@
             }
         }
 
-        // ==================== MOVIMIENTOS - FIRESTORE ====================
         function cargarMovimientos() {
             if (!usuarioActual) return;
 
@@ -736,8 +701,6 @@
                 .orderBy('fecha', 'desc')
                 .onSnapshot((snapshot) => {
                     actualizarDashboard(snapshot);
-                }, (error) => {
-                    console.error("Error al cargar movimientos:", error);
                 });
         }
 
@@ -747,14 +710,11 @@
                 movimientos.push({ id: doc.id, ...doc.data() });
             });
 
-            // Calcular saldo
             const saldo = movimientos.reduce((total, mov) => {
                 return mov.tipo === 'entrada' ? total + mov.monto : total - mov.monto;
             }, 0);
 
             document.getElementById('saldoAmount').textContent = `€${saldo.toFixed(2).replace('.', ',')}`;
-
-            // Renderizar movimientos
             renderizarMovimientos(movimientos);
         }
 
@@ -777,14 +737,13 @@
                         ${mov.tipo === 'entrada' ? '+' : '-'}€${mov.monto.toFixed(2).replace('.', ',')}
                     </div>
                     <div class="movimiento-acciones">
-                        <button class="btn-editar" onclick="editarMovimiento('${mov.id}', ${JSON.stringify(mov).replace(/'/g, "&apos;")})">✏️</button>
+                        <button class="btn-editar" onclick="editarMovimiento('${mov.id}', ${JSON.stringify(mov).replace(/"/g, '&quot;')})">✏️</button>
                         <button class="btn-eliminar" onclick="eliminarMovimiento('${mov.id}')">🗑️</button>
                     </div>
                 </div>
             `).join('');
         }
 
-        // ==================== MODAL ====================
         function showAddModal() {
             movimientoEditando = null;
             document.getElementById('modalTitle').textContent = 'Nuevo Movimiento';
@@ -824,7 +783,7 @@
             const nota = document.getElementById('modalNota').value;
 
             if (!fecha || !concepto || !tipo || !monto) {
-                alert('Por favor rellena todos los campos obligatorios');
+                alert('Por favor rellena todos los campos');
                 return;
             }
 
@@ -840,42 +799,34 @@
             const usuarioRef = db.collection('usuarios').doc(usuarioActual.uid);
 
             if (movimientoEditando) {
-                // Actualizar
                 usuarioRef.collection('movimientos').doc(movimientoEditando).update(movimiento)
                     .then(() => {
-                        console.log("✅ Movimiento actualizado");
                         closeModal();
                     })
                     .catch((error) => {
-                        alert('Error al actualizar: ' + error.message);
+                        alert('Error: ' + error.message);
                     });
             } else {
-                // Crear nuevo
                 usuarioRef.collection('movimientos').add(movimiento)
                     .then(() => {
-                        console.log("✅ Movimiento creado");
                         closeModal();
                     })
                     .catch((error) => {
-                        alert('Error al guardar: ' + error.message);
+                        alert('Error: ' + error.message);
                     });
             }
         }
 
         function eliminarMovimiento(id) {
-            if (confirm('¿Estás seguro de que quieres eliminar este movimiento?')) {
+            if (confirm('¿Eliminar este movimiento?')) {
                 db.collection('usuarios').doc(usuarioActual.uid)
                     .collection('movimientos').doc(id).delete()
-                    .then(() => {
-                        console.log("✅ Movimiento eliminado");
-                    })                    
                     .catch((error) => {
-                        alert('Error al eliminar: ' + error.message);
+                        alert('Error: ' + error.message);
                     });
             }
         }
 
-        // ==================== UTILIDADES ====================
         function formatearFecha(fecha) {
             const date = new Date(fecha + 'T00:00:00');
             const hoy = new Date();
