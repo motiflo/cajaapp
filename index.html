@@ -215,6 +215,40 @@
             opacity: 0.8;
         }
 
+        .grafica-container {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .grafica-titulo {
+            text-align: left;
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .grafica-wrapper {
+            position: relative;
+            height: 260px;
+        }
+        
+        .grafica-empty {
+            text-align: center;
+            color: #999;
+            padding: 40px 20px;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 600px) {
+            .grafica-wrapper {
+                height: 220px;
+            }
+        }        
+
         .add-movimiento-section {
             margin-bottom: 30px;
         }
@@ -484,6 +518,16 @@
                     <div class="saldo-info">Total disponible</div>
                 </div>
 
+            <div class="grafica-container">
+                <div class="grafica-titulo">📈 Evolución de Ingresos y Gastos</div>
+                <div class="grafica-wrapper" id="graficaWrapper">
+                    <canvas id="graficaEvolucion"></canvas>
+                </div>
+                <div class="grafica-empty" id="graficaEmpty" style="display: none;">
+                    Todavía no hay datos suficientes para mostrar la gráfica
+                </div>
+            </div>                
+
                 <div class="add-movimiento-section">
                     <button type="button" class="btn-primary" onclick="showAddModal()">
                         ➕ Nuevo Movimiento
@@ -522,6 +566,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -716,6 +761,7 @@
 
             document.getElementById('saldoAmount').textContent = `€${saldo.toFixed(2).replace('.', ',')}`;
             renderizarMovimientos(movimientos);
+            actualizarGrafica(movimientos);
         }
 
         function renderizarMovimientos(movimientos) {
@@ -743,6 +789,164 @@
                 </div>
             `).join('');
         }
+
+let instanciaGrafica = null;
+
+/**
+ * Agrupa los movimientos por fecha, separa entradas/salidas
+ * y calcula el saldo acumulado día a día.
+ * Reutiliza el mismo patrón de fechas que formatearFecha (evita
+ * problemas de zona horaria usando el string 'YYYY-MM-DD' tal cual).
+ */
+function procesarDatosGrafica(movimientos) {
+    if (!movimientos || movimientos.length === 0) {
+        return null;
+    }
+
+    // Agrupar por fecha (clave = string 'YYYY-MM-DD')
+    const porFecha = {};
+
+    movimientos.forEach((mov) => {
+        if (!porFecha[mov.fecha]) {
+            porFecha[mov.fecha] = { entradas: 0, salidas: 0 };
+        }
+        if (mov.tipo === 'entrada') {
+            porFecha[mov.fecha].entradas += mov.monto;
+        } else {
+            porFecha[mov.fecha].salidas += mov.monto;
+        }
+    });
+
+    // Ordenar fechas cronológicamente (ascendente, para la evolución temporal)
+    const fechasOrdenadas = Object.keys(porFecha).sort((a, b) => {
+        return new Date(a + 'T00:00:00') - new Date(b + 'T00:00:00');
+    });
+
+    const etiquetas = [];
+    const entradas = [];
+    const salidas = [];
+    const saldoAcumulado = [];
+    let acumulado = 0;
+
+    fechasOrdenadas.forEach((fecha) => {
+        const datosDia = porFecha[fecha];
+        acumulado += datosDia.entradas - datosDia.salidas;
+
+        // Etiqueta corta tipo '5 jul'
+        const date = new Date(fecha + 'T00:00:00');
+        etiquetas.push(date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }));
+
+        entradas.push(datosDia.entradas);
+        salidas.push(datosDia.salidas);
+        saldoAcumulado.push(acumulado);
+    });
+
+    return { etiquetas, entradas, salidas, saldoAcumulado };
+}
+
+/**
+ * Crea o actualiza la instancia de Chart.js con los datos procesados.
+ * Si no hay movimientos, muestra el estado vacío en su lugar.
+ */
+function actualizarGrafica(movimientos) {
+    const wrapper = document.getElementById('graficaWrapper');
+    const emptyState = document.getElementById('graficaEmpty');
+    const datos = procesarDatosGrafica(movimientos);
+
+    if (!datos) {
+        wrapper.style.display = 'none';
+        emptyState.style.display = 'block';
+        if (instanciaGrafica) {
+            instanciaGrafica.destroy();
+            instanciaGrafica = null;
+        }
+        return;
+    }
+
+    wrapper.style.display = 'block';
+    emptyState.style.display = 'none';
+
+    const canvas = document.getElementById('graficaEvolucion');
+    const ctx = canvas.getContext('2d');
+
+    const configDatos = {
+        labels: datos.etiquetas,
+        datasets: [
+            {
+                label: 'Entradas',
+                data: datos.entradas,
+                borderColor: '#2ecc71',
+                backgroundColor: 'rgba(46, 204, 113, 0.15)',
+                tension: 0.3,
+                fill: true,
+                pointRadius: 3
+            },
+            {
+                label: 'Salidas',
+                data: datos.salidas,
+                borderColor: '#e74c3c',
+                backgroundColor: 'rgba(231, 76, 60, 0.15)',
+                tension: 0.3,
+                fill: true,
+                pointRadius: 3
+            },
+            {
+                label: 'Saldo acumulado',
+                data: datos.saldoAcumulado,
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102, 126, 234, 0.08)',
+                tension: 0.3,
+                fill: false,
+                borderDash: [5, 5],
+                pointRadius: 2
+            }
+        ]
+    };
+
+    const configOpciones = {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+            mode: 'index',
+            intersect: false
+        },
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: { boxWidth: 12, font: { size: 12 } }
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(contexto) {
+                        const valor = contexto.parsed.y;
+                        return `${contexto.dataset.label}: €${valor.toFixed(2).replace('.', ',')}`;
+                    }
+                }
+            }
+        },
+        scales: {
+            y: {
+                ticks: {
+                    callback: function(valor) {
+                        return `€${valor}`;
+                    }
+                }
+            }
+        }
+    };
+
+    // Si ya existe una instancia, la actualizamos en vez de recrearla (más eficiente)
+    if (instanciaGrafica) {
+        instanciaGrafica.data = configDatos;
+        instanciaGrafica.update();
+    } else {
+        instanciaGrafica = new Chart(ctx, {
+            type: 'line',
+            data: configDatos,
+            options: configOpciones
+        });
+    }
+}        
 
         function showAddModal() {
             movimientoEditando = null;
