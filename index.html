@@ -821,7 +821,7 @@
             if (confirm('¿Eliminar este movimiento?')) {
                 db.collection('usuarios').doc(usuarioActual.uid)
                     .collection('movimientos').doc(id).delete()
-                    .catch((error) => {
+                    .catch((error) => {        
                         alert('Error: ' + error.message);
                     });
             }
