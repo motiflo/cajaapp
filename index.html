@@ -47,62 +47,109 @@
             opacity: 0.9;
         }
 
-        .login-screen {
+        .auth-screen {
             padding: 40px 20px;
             text-align: center;
         }
 
-        .login-screen h2 {
+        .auth-tabs {
+            display: flex;
+            gap: 10px;
             margin-bottom: 30px;
-            color: #333;
         }
 
-        .login-form input {
-            width: 100%;
-            padding: 15px;
-            margin-bottom: 15px;
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
             border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 16px;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
             transition: all 0.3s;
         }
 
-        .login-form input:focus {
+        .tab-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .auth-form h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .auth-form input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .auth-form input:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
         }
 
-        .login-form button {
+        .auth-form button {
             width: 100%;
-            padding: 15px;
+            padding: 12px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
             transition: transform 0.2s;
         }
 
-        .login-form button:hover {
+        .auth-form button:hover {
             transform: translateY(-2px);
         }
 
-        .login-info {
-            margin-top: 30px;
-            padding: 20px;
-            background: #f5f5f5;
-            border-radius: 10px;
-            font-size: 13px;
-            color: #666;
+        .auth-form button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
-        .login-info strong {
+        .error-message {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #fadbd8;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .error-message.show {
             display: block;
-            margin-bottom: 10px;
-            color: #333;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .loading.show {
+            display: block;
         }
 
         .main-screen {
@@ -172,48 +219,19 @@
             margin-bottom: 30px;
         }
 
-        .form-movimiento {
-            background: #f9f9f9;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-
-        .form-movimiento input,
-        .form-movimiento select,
-        .form-movimiento textarea {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: inherit;
-        }
-
-        .form-movimiento select {
-            cursor: pointer;
-        }
-
-        .form-movimiento textarea {
-            resize: vertical;
-            min-height: 70px;
-        }
-
-        .form-movimiento button {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .btn-primary {
+            background: #667eea;
             color: white;
             border: none;
+            padding: 12px 20px;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: bold;
             cursor: pointer;
         }
 
-        .form-movimiento button:hover {
-            opacity: 0.9;
+        .btn-primary:hover {
+            background: #5568d3;
         }
 
         .historial-title {
@@ -413,30 +431,45 @@
             .btn-editar, .btn-eliminar {
                 flex: 1;
             }
+
+            .auth-tabs {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- PANTALLA LOGIN -->
-        <div id="loginScreen" class="login-screen">
+        <!-- PANTALLA AUTENTICACIÓN -->
+        <div id="authScreen" class="auth-screen">
             <div class="header">
                 <h1>💰 CajaApp</h1>
                 <p>Gestor de Caja Personal</p>
             </div>
 
-            <h2>Acceder</h2>
-            <form class="login-form" onsubmit="handleLogin(event)">
+            <div class="auth-tabs">
+                <button class="tab-btn active" onclick="switchTab('login')">Acceder</button>
+                <button class="tab-btn" onclick="switchTab('registro')">Registro</button>
+            </div>
+
+            <!-- FORMULARIO LOGIN -->
+            <form class="auth-form active" id="loginForm" onsubmit="handleLogin(event)">
+                <div class="error-message" id="loginError"></div>
+                <div class="loading" id="loginLoading">Accediendo...</div>
                 <input type="email" id="loginEmail" placeholder="Email" required>
                 <input type="password" id="loginPassword" placeholder="Contraseña" required>
-                <button type="submit">Entrar</button>
+                <button type="submit">Acceder</button>
             </form>
 
-            <div class="login-info">
-                <strong>Credenciales de prueba:</strong>
-                Email: <strong>usuario@cajaapp.com</strong><br>
-                Contraseña: <strong>123456</strong>
-            </div>
+            <!-- FORMULARIO REGISTRO -->
+            <form class="auth-form" id="registroForm" onsubmit="handleRegistro(event)">
+                <div class="error-message" id="registroError"></div>
+                <div class="loading" id="registroLoading">Creando cuenta...</div>
+                <input type="email" id="registroEmail" placeholder="Email" required>
+                <input type="password" id="registroPassword" placeholder="Contraseña (mín. 6 caracteres)" required>
+                <input type="password" id="registroPassword2" placeholder="Confirmar contraseña" required>
+                <button type="submit">Crear cuenta</button>
+            </form>
         </div>
 
         <!-- PANTALLA PRINCIPAL -->
@@ -458,7 +491,7 @@
 
                 <!-- FORMULARIO NUEVO MOVIMIENTO -->
                 <div class="add-movimiento-section">
-                    <button class="logout-btn" style="background: #667eea; width: auto; padding: 12px 20px;" onclick="showAddModal()">
+                    <button type="button" class="btn-primary" onclick="showAddModal()">
                         ➕ Nuevo Movimiento
                     </button>
                 </div>
@@ -497,21 +530,70 @@
         </div>
     </div>
 
+    <!-- FIREBASE SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js"></script>
+
     <script>
+        // ==================== CONFIGURACIÓN FIREBASE ====================
+        // 👇 PEGA TU CÓDIGO DE FIREBASE AQUÍ 👇
+        const firebaseConfig = {
+            apiKey: "PEGA_AQUÍ_TU_apiKey",
+            authDomain: "PEGA_AQUÍ_TU_authDomain",
+            projectId: "PEGA_AQUÍ_TU_projectId",
+            storageBucket: "PEGA_AQUÍ_TU_storageBucket",
+            messagingSenderId: "PEGA_AQUÍ_TU_messagingSenderId",
+            appId: "PEGA_AQUÍ_TU_appId"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
         // ==================== ESTADO ====================
         let usuarioActual = null;
         let movimientoEditando = null;
-        let movimientos = [];
 
         // ==================== INICIALIZACIÓN ====================
         document.addEventListener('DOMContentLoaded', function() {
-            cargarDatos();
-            mostrarPantalla();
+            // Observar cambios de autenticación
+            auth.onAuthStateChanged((user) => {
+                usuarioActual = user;
+                mostrarPantalla();
+                if (user) {
+                    cargarMovimientos();
+                }
+            });
 
             // Establecer fecha actual en el modal
             const hoy = new Date().toISOString().split('T')[0];
             document.getElementById('modalFecha').value = hoy;
         });
+
+        // ==================== CAMBIAR ENTRE TABS ====================
+        function switchTab(tab) {
+            const loginForm = document.getElementById('loginForm');
+            const registroForm = document.getElementById('registroForm');
+            const buttons = document.querySelectorAll('.tab-btn');
+
+            if (tab === 'login') {
+                loginForm.classList.add('active');
+                registroForm.classList.remove('active');
+                buttons[0].classList.add('active');
+                buttons[1].classList.remove('active');
+            } else {
+                loginForm.classList.remove('active');
+                registroForm.classList.add('active');
+                buttons[0].classList.remove('active');
+                buttons[1].classList.add('active');
+            }
+
+            // Limpiar errores
+            document.getElementById('loginError').classList.remove('show');
+            document.getElementById('registroError').classList.remove('show');
+        }
 
         // ==================== LOGIN ====================
         function handleLogin(event) {
@@ -520,42 +602,142 @@
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
 
-            // Validación simple (credenciales fijas para prototipo)
-            if (email === 'usuario@cajaapp.com' && password === '123456') {
-                usuarioActual = { email: email };
-                guardarDatos();
-                mostrarPantalla();
-                limpiarFormularioLogin();
-            } else {
-                alert('Email o contraseña incorrectos.\n\nUsa:\nEmail: usuario@cajaapp.com\nContraseña: 123456');
+            const loginLoading = document.getElementById('loginLoading');
+            const loginError = document.getElementById('loginError');
+            const submitBtn = document.querySelector('#loginForm button');
+
+            // Mostrar estado de carga
+            loginLoading.classList.add('show');
+            submitBtn.disabled = true;
+            loginError.classList.remove('show');
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Login exitoso
+                    loginLoading.classList.remove('show');
+                    submitBtn.disabled = false;
+                    limpiarFormularios();
+                })
+                .catch((error) => {
+                    // Error
+                    loginLoading.classList.remove('show');
+                    submitBtn.disabled = false;
+
+                    let mensaje = 'Error desconocido';
+                    if (error.code === 'auth/user-not-found') {
+                        mensaje = 'El email no existe. ¿Quizás quieras crear una cuenta?';
+                    } else if (error.code === 'auth/wrong-password') {
+                        mensaje = 'Contraseña incorrecta';
+                    } else if (error.code === 'auth/invalid-email') {
+                        mensaje = 'Email inválido';
+                    }
+
+                    loginError.textContent = mensaje;
+                    loginError.classList.add('show');
+                });
+        }
+
+        // ==================== REGISTRO ====================
+        function handleRegistro(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('registroEmail').value;
+            const password = document.getElementById('registroPassword').value;
+            const password2 = document.getElementById('registroPassword2').value;
+
+            const registroLoading = document.getElementById('registroLoading');
+            const registroError = document.getElementById('registroError');
+            const submitBtn = document.querySelector('#registroForm button');
+
+            // Validar contraseñas
+            if (password !== password2) {
+                registroError.textContent = 'Las contraseñas no coinciden';
+                registroError.classList.add('show');
+                return;
             }
+
+            if (password.length < 6) {
+                registroError.textContent = 'La contraseña debe tener mínimo 6 caracteres';
+                registroError.classList.add('show');
+                return;
+            }
+
+            // Mostrar estado de carga
+            registroLoading.classList.add('show');
+            submitBtn.disabled = true;
+            registroError.classList.remove('show');
+
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Cuenta creada
+                    registroLoading.classList.remove('show');
+                    submitBtn.disabled = false;
+                    limpiarFormularios();
+                    switchTab('login');
+                    alert('¡Cuenta creada! Ahora puedes acceder con tus credenciales.');
+                })
+                .catch((error) => {
+                    // Error
+                    registroLoading.classList.remove('show');
+                    submitBtn.disabled = false;
+
+                    let mensaje = 'Error desconocido';
+                    if (error.code === 'auth/email-already-in-use') {
+                        mensaje = 'Este email ya está registrado';
+                    } else if (error.code === 'auth/invalid-email') {
+                        mensaje = 'Email inválido';
+                    } else if (error.code === 'auth/weak-password') {
+                        mensaje = 'Contraseña demasiado débil';
+                    }
+
+                    registroError.textContent = mensaje;
+                    registroError.classList.add('show');
+                });
         }
 
+        // ==================== LOGOUT ====================
         function handleLogout() {
-            usuarioActual = null;
-            movimientoEditando = null;
-            guardarDatos();
-            mostrarPantalla();
+            auth.signOut().then(() => {
+                usuarioActual = null;
+                movimientoEditando = null;
+                limpiarFormularios();
+                mostrarPantalla();
+            });
         }
 
-        // ==================== PANTALLAS ====================
+        // ==================== MOSTRAR PANTALLAS ====================
         function mostrarPantalla() {
-            const loginScreen = document.getElementById('loginScreen');
+            const authScreen = document.getElementById('authScreen');
             const mainScreen = document.getElementById('mainScreen');
 
             if (usuarioActual) {
-                loginScreen.style.display = 'none';
+                authScreen.style.display = 'none';
                 mainScreen.style.display = 'block';
                 document.getElementById('userEmail').textContent = usuarioActual.email;
-                actualizarDashboard();
             } else {
-                loginScreen.style.display = 'block';
+                authScreen.style.display = 'block';
                 mainScreen.style.display = 'none';
             }
         }
 
-        // ==================== DASHBOARD ====================
-        function actualizarDashboard() {
+        // ==================== MOVIMIENTOS - FIRESTORE ====================
+        function cargarMovimientos() {
+            if (!usuarioActual) return;
+
+            db.collection('usuarios').doc(usuarioActual.uid)
+                .collection('movimientos')
+                .orderBy('fecha', 'desc')
+                .onSnapshot((snapshot) => {
+                    actualizarDashboard(snapshot);
+                });
+        }
+
+        function actualizarDashboard(snapshot) {
+            const movimientos = [];
+            snapshot.forEach((doc) => {
+                movimientos.push({ id: doc.id, ...doc.data() });
+            });
+
             // Calcular saldo
             const saldo = movimientos.reduce((total, mov) => {
                 return mov.tipo === 'entrada' ? total + mov.monto : total - mov.monto;
@@ -564,10 +746,10 @@
             document.getElementById('saldoAmount').textContent = `€${saldo.toFixed(2).replace('.', ',')}`;
 
             // Renderizar movimientos
-            renderizarMovimientos();
+            renderizarMovimientos(movimientos);
         }
 
-        function renderizarMovimientos() {
+        function renderizarMovimientos(movimientos) {
             const lista = document.getElementById('movimientosList');
 
             if (movimientos.length === 0) {
@@ -586,8 +768,8 @@
                         ${mov.tipo === 'entrada' ? '+' : '-'}€${mov.monto.toFixed(2).replace('.', ',')}
                     </div>
                     <div class="movimiento-acciones">
-                        <button class="btn-editar" onclick="editarMovimiento(${index})">✏️</button>
-                        <button class="btn-eliminar" onclick="eliminarMovimiento(${index})">🗑️</button>
+                        <button class="btn-editar" onclick="editarMovimiento('${mov.id}', ${JSON.stringify(mov)})">✏️</button>
+                        <button class="btn-eliminar" onclick="eliminarMovimiento('${mov.id}')">🗑️</button>
                     </div>
                 </div>
             `).join('');
@@ -605,17 +787,14 @@
             document.getElementById('modalMovimiento').classList.add('active');
         }
 
-        function editarMovimiento(index) {
-            movimientoEditando = index;
-            const mov = movimientos[index];
-
+        function editarMovimiento(id, movimiento) {
+            movimientoEditando = id;
             document.getElementById('modalTitle').textContent = 'Editar Movimiento';
-            document.getElementById('modalFecha').value = mov.fecha;
-            document.getElementById('modalConcepto').value = mov.concepto;
-            document.getElementById('modalTipo').value = mov.tipo;
-            document.getElementById('modalMonto').value = mov.monto;
-            document.getElementById('modalNota').value = mov.nota || '';
-
+            document.getElementById('modalFecha').value = movimiento.fecha;
+            document.getElementById('modalConcepto').value = movimiento.concepto;
+            document.getElementById('modalTipo').value = movimiento.tipo;
+            document.getElementById('modalMonto').value = movimiento.monto;
+            document.getElementById('modalNota').value = movimiento.nota || '';
             document.getElementById('modalMovimiento').classList.add('active');
         }
 
@@ -626,6 +805,8 @@
 
         function handleSaveMovimiento(event) {
             event.preventDefault();
+
+            if (!usuarioActual) return;
 
             const fecha = document.getElementById('modalFecha').value;
             const concepto = document.getElementById('modalConcepto').value;
@@ -639,48 +820,44 @@
             }
 
             const movimiento = {
-                id: movimientoEditando !== null ? movimientos[movimientoEditando].id : Date.now(),
                 fecha: fecha,
                 concepto: concepto,
                 tipo: tipo,
                 monto: monto,
-                nota: nota
+                nota: nota,
+                createdAt: new Date()
             };
 
-            if (movimientoEditando !== null) {
-                movimientos[movimientoEditando] = movimiento;
+            const usuarioRef = db.collection('usuarios').doc(usuarioActual.uid);
+
+            if (movimientoEditando) {
+                // Actualizar
+                usuarioRef.collection('movimientos').doc(movimientoEditando).update(movimiento)
+                    .then(() => {
+                        closeModal();
+                    })
+                    .catch((error) => {
+                        alert('Error al actualizar: ' + error.message);
+                    });
             } else {
-                movimientos.unshift(movimiento);
+                // Crear nuevo
+                usuarioRef.collection('movimientos').add(movimiento)
+                    .then(() => {
+                        closeModal();
+                    })
+                    .catch((error) => {
+                        alert('Error al guardar: ' + error.message);
+                    });
             }
-
-            guardarDatos();
-            actualizarDashboard();
-            closeModal();
         }
 
-        function eliminarMovimiento(index) {
+        function eliminarMovimiento(id) {
             if (confirm('¿Estás seguro de que quieres eliminar este movimiento?')) {
-                movimientos.splice(index, 1);
-                guardarDatos();
-                actualizarDashboard();
-            }
-        }
-
-        // ==================== DATOS ====================
-        function guardarDatos() {
-            const datos = {
-                usuario: usuarioActual,
-                movimientos: movimientos
-            };
-            localStorage.setItem('cajaapp_datos', JSON.stringify(datos));
-        }
-
-        function cargarDatos() {
-            const datos = localStorage.getItem('cajaapp_datos');
-            if (datos) {
-                const parsed = JSON.parse(datos);
-                usuarioActual = parsed.usuario;
-                movimientos = parsed.movimientos || [];
+                db.collection('usuarios').doc(usuarioActual.uid)
+                    .collection('movimientos').doc(id).delete()
+                    .catch((error) => {
+                        alert('Error al eliminar: ' + error.message);
+                    });
             }
         }
 
@@ -700,9 +877,11 @@
             return date.toLocaleDateString('es-ES', { weekday: 'short', month: 'short', day: 'numeric' });
         }
 
-        function limpiarFormularioLogin() {
-            document.getElementById('loginEmail').value = '';
-            document.getElementById('loginPassword').value = '';
+        function limpiarFormularios() {
+            document.getElementById('loginForm').reset();
+            document.getElementById('registroForm').reset();
+            document.getElementById('loginError').classList.remove('show');
+            document.getElementById('registroError').classList.remove('show');
         }
     </script>
 </body>
