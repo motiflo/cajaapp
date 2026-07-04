@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CajaApp - Gestor de Caja Personal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .login-screen {
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .login-screen h2 {
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .login-form input {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .login-form input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .login-form button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .login-form button:hover {
+            transform: translateY(-2px);
+        }
+
+        .login-info {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .login-info strong {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .main-screen {
+            display: none;
+            padding: 0;
+        }
+
+        .top-bar {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .logout-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .logout-btn:hover {
+            background: #ff5252;
+        }
+
+        .dashboard {
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .saldo-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .saldo-label {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .saldo-amount {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .saldo-info {
+            font-size: 13px;
+            opacity: 0.8;
+        }
+
+        .add-movimiento-section {
+            margin-bottom: 30px;
+        }
+
+        .form-movimiento {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .form-movimiento input,
+        .form-movimiento select,
+        .form-movimiento textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-movimiento select {
+            cursor: pointer;
+        }
+
+        .form-movimiento textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+
+        .form-movimiento button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .form-movimiento button:hover {
+            opacity: 0.9;
+        }
+
+        .historial-title {
+            text-align: left;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .movimientos-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .movimiento-item {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .movimiento-item:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .movimiento-info {
+            text-align: left;
+            flex: 1;
+        }
+
+        .movimiento-fecha {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 5px;
+        }
+
+        .movimiento-concepto {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .movimiento-nota {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .movimiento-monto {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0 15px;
+            min-width: 100px;
+            text-align: right;
+        }
+
+        .movimiento-entrada {
+            color: #2ecc71;
+        }
+
+        .movimiento-salida {
+            color: #e74c3c;
+        }
+
+        .movimiento-acciones {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-editar, .btn-eliminar {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .btn-editar {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-editar:hover {
+            background: #2980b9;
+        }
+
+        .btn-eliminar {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-eliminar:hover {
+            background: #c0392b;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 30px 20px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .modal-content input,
+        .modal-content select,
+        .modal-content textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-guardar {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-cancelar {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        @media (max-width: 600px) {
+            .saldo-amount {
+                font-size: 36px;
+            }
+
+            .movimiento-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .movimiento-monto {
+                margin: 10px 0 0 0;
+                text-align: left;
+            }
+
+            .movimiento-acciones {
+                width: 100%;
+                margin-top: 10px;
+            }
+
+            .btn-editar, .btn-eliminar {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- PANTALLA LOGIN -->
+        <div id="loginScreen" class="login-screen">
+            <div class="header">
+                <h1>💰 CajaApp</h1>
+                <p>Gestor de Caja Personal</p>
+            </div>
+
+            <h2>Acceder</h2>
+            <form class="login-form" onsubmit="handleLogin(event)">
+                <input type="email" id="loginEmail" placeholder="Email" required>
+                <input type="password" id="loginPassword" placeholder="Contraseña" required>
+                <button type="submit">Entrar</button>
+            </form>
+
+            <div class="login-info">
+                <strong>Credenciales de prueba:</strong>
+                Email: <strong>usuario@cajaapp.com</strong><br>
+                Contraseña: <strong>123456</strong>
+            </div>
+        </div>
+
+        <!-- PANTALLA PRINCIPAL -->
+        <div id="mainScreen" class="main-screen">
+            <div class="top-bar">
+                <div class="user-info">
+                    👤 <span id="userEmail"></span>
+                </div>
+                <button class="logout-btn" onclick="handleLogout()">Cerrar sesión</button>
+            </div>
+
+            <div class="dashboard">
+                <!-- SALDO ACTUAL -->
+                <div class="saldo-container">
+                    <div class="saldo-label">Efectivo en Caja</div>
+                    <div class="saldo-amount" id="saldoAmount">€0,00</div>
+                    <div class="saldo-info">Total disponible</div>
+                </div>
+
+                <!-- FORMULARIO NUEVO MOVIMIENTO -->
+                <div class="add-movimiento-section">
+                    <button class="logout-btn" style="background: #667eea; width: auto; padding: 12px 20px;" onclick="showAddModal()">
+                        ➕ Nuevo Movimiento
+                    </button>
+                </div>
+
+                <!-- HISTORIAL -->
+                <div id="historialContainer">
+                    <div class="historial-title">Últimos Movimientos</div>
+                    <div id="movimientosList" class="movimientos-lista">
+                        <div class="empty-state">No hay movimientos todavía</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PARA AÑADIR/EDITAR -->
+    <div id="modalMovimiento" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Nuevo Movimiento</h2>
+            <form onsubmit="handleSaveMovimiento(event)">
+                <input type="date" id="modalFecha" required>
+                <input type="text" id="modalConcepto" placeholder="Concepto (ej: Depósito, Gasto)" required>
+                <select id="modalTipo" required>
+                    <option value="">-- Selecciona tipo --</option>
+                    <option value="entrada">➕ Entrada</option>
+                    <option value="salida">➖ Salida</option>
+                </select>
+                <input type="number" id="modalMonto" placeholder="Cantidad (€)" step="0.01" min="0" required>
+                <textarea id="modalNota" placeholder="Nota (opcional)"></textarea>
+
+                <div class="modal-buttons">
+                    <button type="submit" class="btn-guardar">Guardar</button>
+                    <button type="button" class="btn-cancelar" onclick="closeModal()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ==================== ESTADO ====================
+        let usuarioActual = null;
+        let movimientoEditando = null;
+        let movimientos = [];
+
+        // ==================== INICIALIZACIÓN ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarDatos();
+            mostrarPantalla();
+
+            // Establecer fecha actual en el modal
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('modalFecha').value = hoy;
+        });
+
+        // ==================== LOGIN ====================
+        function handleLogin(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            // Validación simple (credenciales fijas para prototipo)
+            if (email === 'usuario@cajaapp.com' && password === '123456') {
+                usuarioActual = { email: email };
+                guardarDatos();
+                mostrarPantalla();
+                limpiarFormularioLogin();
+            } else {
+                alert('Email o contraseña incorrectos.\n\nUsa:\nEmail: usuario@cajaapp.com\nContraseña: 123456');
+            }
+        }
+
+        function handleLogout() {
+            usuarioActual = null;
+            movimientoEditando = null;
+            guardarDatos();
+            mostrarPantalla();
+        }
+
+        // ==================== PANTALLAS ====================
+        function mostrarPantalla() {
+            const loginScreen = document.getElementById('loginScreen');
+            const mainScreen = document.getElementById('mainScreen');
+
+            if (usuarioActual) {
+                loginScreen.style.display = 'none';
+                mainScreen.style.display = 'block';
+                document.getElementById('userEmail').textContent = usuarioActual.email;
+                actualizarDashboard();
+            } else {
+                loginScreen.style.display = 'block';
+                mainScreen.style.display = 'none';
+            }
+        }
+
+        // ==================== DASHBOARD ====================
+        function actualizarDashboard() {
+            // Calcular saldo
+            const saldo = movimientos.reduce((total, mov) => {
+                return mov.tipo === 'entrada' ? total + mov.monto : total - mov.monto;
+            }, 0);
+
+            document.getElementById('saldoAmount').textContent = `€${saldo.toFixed(2).replace('.', ',')}`;
+
+            // Renderizar movimientos
+            renderizarMovimientos();
+        }
+
+        function renderizarMovimientos() {
+            const lista = document.getElementById('movimientosList');
+
+            if (movimientos.length === 0) {
+                lista.innerHTML = '<div class="empty-state">No hay movimientos todavía</div>';
+                return;
+            }
+
+            lista.innerHTML = movimientos.map((mov, index) => `
+                <div class="movimiento-item">
+                    <div class="movimiento-info">
+                        <div class="movimiento-fecha">${formatearFecha(mov.fecha)}</div>
+                        <div class="movimiento-concepto">${mov.concepto}</div>
+                        ${mov.nota ? `<div class="movimiento-nota">${mov.nota}</div>` : ''}
+                    </div>
+                    <div class="movimiento-monto ${mov.tipo === 'entrada' ? 'movimiento-entrada' : 'movimiento-salida'}">
+                        ${mov.tipo === 'entrada' ? '+' : '-'}€${mov.monto.toFixed(2).replace('.', ',')}
+                    </div>
+                    <div class="movimiento-acciones">
+                        <button class="btn-editar" onclick="editarMovimiento(${index})">✏️</button>
+                        <button class="btn-eliminar" onclick="eliminarMovimiento(${index})">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ==================== MODAL ====================
+        function showAddModal() {
+            movimientoEditando = null;
+            document.getElementById('modalTitle').textContent = 'Nuevo Movimiento';
+            document.getElementById('modalFecha').value = new Date().toISOString().split('T')[0];
+            document.getElementById('modalConcepto').value = '';
+            document.getElementById('modalTipo').value = '';
+            document.getElementById('modalMonto').value = '';
+            document.getElementById('modalNota').value = '';
+            document.getElementById('modalMovimiento').classList.add('active');
+        }
+
+        function editarMovimiento(index) {
+            movimientoEditando = index;
+            const mov = movimientos[index];
+
+            document.getElementById('modalTitle').textContent = 'Editar Movimiento';
+            document.getElementById('modalFecha').value = mov.fecha;
+            document.getElementById('modalConcepto').value = mov.concepto;
+            document.getElementById('modalTipo').value = mov.tipo;
+            document.getElementById('modalMonto').value = mov.monto;
+            document.getElementById('modalNota').value = mov.nota || '';
+
+            document.getElementById('modalMovimiento').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modalMovimiento').classList.remove('active');
+            movimientoEditando = null;
+        }
+
+        function handleSaveMovimiento(event) {
+            event.preventDefault();
+
+            const fecha = document.getElementById('modalFecha').value;
+            const concepto = document.getElementById('modalConcepto').value;
+            const tipo = document.getElementById('modalTipo').value;
+            const monto = parseFloat(document.getElementById('modalMonto').value);
+            const nota = document.getElementById('modalNota').value;
+
+            if (!fecha || !concepto || !tipo || !monto) {
+                alert('Por favor rellena todos los campos obligatorios');
+                return;
+            }
+
+            const movimiento = {
+                id: movimientoEditando !== null ? movimientos[movimientoEditando].id : Date.now(),
+                fecha: fecha,
+                concepto: concepto,
+                tipo: tipo,
+                monto: monto,
+                nota: nota
+            };
+
+            if (movimientoEditando !== null) {
+                movimientos[movimientoEditando] = movimiento;
+            } else {
+                movimientos.unshift(movimiento);
+            }
+
+            guardarDatos();
+            actualizarDashboard();
+            closeModal();
+        }
+
+        function eliminarMovimiento(index) {
+            if (confirm('¿Estás seguro de que quieres eliminar este movimiento?')) {
+                movimientos.splice(index, 1);
+                guardarDatos();
+                actualizarDashboard();
+            }
+        }
+
+        // ==================== DATOS ====================
+        function guardarDatos() {
+            const datos = {
+                usuario: usuarioActual,
+                movimientos: movimientos
+            };
+            localStorage.setItem('cajaapp_datos', JSON.stringify(datos));
+        }
+
+        function cargarDatos() {
+            const datos = localStorage.getItem('cajaapp_datos');
+            if (datos) {
+                const parsed = JSON.parse(datos);
+                usuarioActual = parsed.usuario;
+                movimientos = parsed.movimientos || [];
+            }
+        }
+
+        // ==================== UTILIDADES ====================
+        function formatearFecha(fecha) {
+            const date = new Date(fecha + 'T00:00:00');
+            const hoy = new Date();
+            const ayer = new Date(hoy);
+            ayer.setDate(ayer.getDate() - 1);
+
+            const esHoy = date.toDateString() === hoy.toDateString();
+            const esAyer = date.toDateString() === ayer.toDateString();
+
+            if (esHoy) return 'Hoy';
+            if (esAyer) return 'Ayer';
+
+            return date.toLocaleDateString('es-ES', { weekday: 'short', month: 'short', day: 'numeric' });
+        }
+
+        function limpiarFormularioLogin() {
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+        }
+    </script>
+</body>
+</html>
